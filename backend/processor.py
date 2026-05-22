@@ -21,7 +21,11 @@ def generate_thumbnail(video_path: str, output_path: str):
         .run(quiet=True)
     )
 
+import json
+
 def transcribe_video(video_path: str) -> str:
     model = get_whisper_model()
-    result = model.transcribe(video_path)
-    return result["text"]
+    # word_timestamps=True instructs Whisper to include granular timing for words/segments
+    result = model.transcribe(video_path, word_timestamps=True)
+    # Return segments as a serialized JSON string so it can be stored in the DB transcript column
+    return json.dumps(result.get("segments", []))
