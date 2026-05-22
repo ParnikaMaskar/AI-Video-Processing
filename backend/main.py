@@ -437,7 +437,7 @@ def delete_video(
 @app.get("/health")
 def health_check():
     return {
-        "status": "healthy"
+        "status": "healthy", "version": "v2"
     }
 
 
