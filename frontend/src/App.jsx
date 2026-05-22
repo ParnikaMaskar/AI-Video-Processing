@@ -8,13 +8,29 @@ export default function App() {
     <BrowserRouter>
       <header className="navbar">
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: '32px', height: '32px', background: 'var(--primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>V</div>
-            <h1 style={{ fontSize: '1.25rem', margin: 0 }}>AI Video Platform</h1>
-          </div>
-          <nav style={{ display: 'flex', gap: '1rem' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+            <div style={{ 
+              width: '36px', 
+              height: '36px', 
+              background: 'linear-gradient(135deg, var(--primary), #8b5cf6)', 
+              borderRadius: '10px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              color: 'white', 
+              fontWeight: 800,
+              fontSize: '1.125rem',
+              boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.3)'
+            }}>
+              V
+            </div>
+            <h1 style={{ fontSize: '1.35rem', margin: 0, letterSpacing: '-0.03em', color: '#0f172a' }}>
+              AI Video Platform
+            </h1>
+          </Link>
+          <nav style={{ display: 'flex', gap: '0.5rem' }}>
             <Link to="/" className="nav-link">Upload</Link>
-            <Link to="/videos" className="nav-link">My Videos</Link>
+            <Link to="/videos" className="nav-link">Library</Link>
           </nav>
         </div>
       </header>

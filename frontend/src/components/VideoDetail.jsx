@@ -73,71 +73,85 @@ export default function VideoDetail() {
         ← Back to Library
       </Link>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2.5rem' }}>
         <div>
-          <div className="card" style={{ padding: 0, overflow: 'hidden', background: '#000', marginBottom: '1.5rem' }}>
-            <video 
-              src={video.filepath.startsWith('http') ? video.filepath : (window.location.port === '5173' ? `http://localhost:8000/${video.filepath}` : `/${video.filepath}`)} 
-              controls 
-              style={{ width: '100%', display: 'block' }}
-            />
+          <div className="card" style={{ padding: '0.5rem', overflow: 'hidden', background: '#ffffff', marginBottom: '1.5rem', boxShadow: 'var(--shadow-lg)' }}>
+            <div style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', background: '#000' }}>
+              <video 
+                src={video.filepath.startsWith('http') ? video.filepath : (window.location.port === '5173' ? `http://localhost:8000/${video.filepath}` : `/${video.filepath}`)} 
+                controls 
+                style={{ width: '100%', display: 'block', maxHeight: '500px' }}
+              />
+            </div>
           </div>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 700 }}>{video.filename}</h1>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <span className={`badge badge-${video.status}`}>{video.status}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem', fontWeight: 500 }}>
+                  Uploaded {new Date(video.created_at).toLocaleString()}
+                </span>
+              </div>
+              <h1 style={{ margin: 0, fontSize: '1.875rem', fontWeight: 700, lineHeight: 1.2 }}>{video.filename}</h1>
+            </div>
             <button 
               onClick={handleDelete}
               style={{ 
-                background: '#ef4444', 
-                color: '#fff', 
-                border: 'none', 
-                padding: '0.5rem 1rem', 
-                borderRadius: '0.375rem', 
+                background: '#fff', 
+                color: '#ef4444', 
+                border: '1px solid #fee2e2', 
+                padding: '0.6rem 1.25rem', 
+                borderRadius: '0.5rem', 
                 fontWeight: 600, 
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
                 fontSize: '0.875rem',
-                transition: 'opacity 0.2s'
+                transition: 'all 0.2s',
+                boxShadow: 'var(--shadow-sm)'
               }}
-              onMouseOver={e => e.currentTarget.style.opacity = 0.9}
-              onMouseOut={e => e.currentTarget.style.opacity = 1}
+              onMouseOver={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.borderColor = '#fca5a5'; }}
+              onMouseOut={e => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#fee2e2'; }}
             >
-              🗑️ Delete Video
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+              Delete Video
             </button>
-          </div>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '2rem' }}>
-            <span className={`badge badge-${video.status}`}>{video.status}</span>
-            <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-              Uploaded on {new Date(video.created_at).toLocaleString()}
-            </span>
           </div>
         </div>
 
         <div>
-          <div className="card">
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.125rem' }}>AI Transcript</h3>
-            {video.status === 'processing' ? (
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                Transcription is in progress. Please wait...
-              </p>
-            ) : video.transcript ? (
-              <div style={{ 
-                fontSize: '0.9375rem', 
-                lineHeight: '1.6', 
-                color: '#334155',
-                maxHeight: '400px',
-                overflowY: 'auto',
-                paddingRight: '0.5rem'
-              }}>
-                {video.transcript}
+          <div className="card" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+              <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
               </div>
-            ) : (
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                No transcript available.
-              </p>
-            )}
+              <h3 style={{ margin: 0, fontSize: '1.125rem' }}>AI Transcript</h3>
+            </div>
+            
+            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }}>
+              {video.status === 'processing' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px', color: 'var(--text-muted)' }}>
+                  <div className="spinner" style={{ marginBottom: '1rem', width: '24px', height: '24px', borderWidth: '3px' }}></div>
+                  <p style={{ fontSize: '0.9375rem', fontWeight: 500 }}>Transcription in progress...</p>
+                </div>
+              ) : video.transcript ? (
+                <div style={{ 
+                  fontSize: '0.9375rem', 
+                  lineHeight: '1.7', 
+                  color: '#334155',
+                  fontFamily: 'Inter, sans-serif'
+                }}>
+                  {video.transcript}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px', color: 'var(--text-muted)' }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '0.5rem', opacity: 0.5 }}><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                  <p style={{ fontSize: '0.9375rem' }}>No transcript available.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
