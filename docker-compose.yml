@@ -1,0 +1,215 @@
+# Docker Compose version
+# 3.8 is stable and widely supported
+version: '3.8'
+
+services:
+
+  # =========================
+  # PostgreSQL Database
+  # =========================
+  postgres:
+    # Stable non-alpine version
+    # Alpine caused issues in your environment
+    image: postgres:15
+
+    # Friendly container name
+    container_name: video_postgres
+
+    # Restart automatically unless manually stopped
+    restart: unless-stopped
+
+    # Expose PostgreSQL port
+    # HOST:CONTAINER
+    ports:
+      - "5432:5432"
+
+    # Environment variables mapped from root .env file
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    # Persist database data even if container restarts
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    # Healthcheck ensures postgres is ACTUALLY ready
+    # before backend starts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # =========================
+  # Redis Message Broker
+  # =========================
+  redis:
+    image: redis:7.2
+
+    container_name: video_redis
+
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"
+
+    # Persist redis queue data
+    volumes:
+      - redis_data:/data
+
+    # Healthcheck for Redis
+    # "redis-cli ping" should return PONG
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # =========================
+  # FastAPI Backend
+  # =========================
+  backend:
+
+    # Build image from backend folder
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.api
+
+    container_name: video_backend
+
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    # Load variables from root .env file
+    env_file:
+      - .env
+
+    # Pass dynamic connection URLs loaded from the environment
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+
+    # Mount local backend code into container
+    # so changes reflect instantly
+    volumes:
+      - ./backend:/app
+
+      # Persist uploads and thumbnails
+      - ./backend/uploads:/app/uploads
+      - ./backend/thumbnails:/app/thumbnails
+
+    # Wait until postgres + redis are healthy
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+    # Helpful for debugging/log viewing
+    stdin_open: true
+    tty: true
+
+    # Run Alembic migrations automatically
+    # Then start FastAPI server
+    command: >
+      sh -c "
+      alembic upgrade head &&
+      uvicorn main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      "
+
+  # =========================
+  # Celery Background Worker
+  # =========================
+  celery_worker:
+
+    # Build Celery worker image
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+
+    container_name: video_worker
+
+    restart: unless-stopped
+
+    # Load variables from root .env file
+    env_file:
+      - .env
+
+    # Pass dynamic connection URLs loaded from the environment
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+
+    volumes:
+      - ./backend:/app
+
+      - ./backend/uploads:/app/uploads
+      - ./backend/thumbnails:/app/thumbnails
+
+    # Wait until postgres + redis are healthy
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+    stdin_open: true
+    tty: true
+
+    # Celery worker command with multi-process concurrency
+    command: celery -A celery_app worker --loglevel=info --concurrency=2
+
+  # =========================
+  # React + Vite Frontend
+  # =========================
+  frontend:
+
+    build:
+      context: ./frontend
+
+    container_name: video_frontend
+
+    restart: unless-stopped
+
+    ports:
+      - "5173:5173"
+
+    volumes:
+
+      # Mount frontend source code
+      - ./frontend:/app
+
+      # Prevent node_modules conflicts
+      - /app/node_modules
+
+    depends_on:
+      - backend
+
+    # VERY IMPORTANT
+    # Allows Vite to be accessible from host browser
+    command: npm run dev -- --host
+
+# =========================
+# Persistent Named Volumes
+# =========================
+volumes:
+
+  postgres_data:
+
+  redis_data:
+
+# =========================
+# Shared Docker Network
+# =========================
+networks:
+  default:
+    name: video_network
+

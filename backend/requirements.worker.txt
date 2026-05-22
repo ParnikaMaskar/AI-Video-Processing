@@ -1,0 +1,8 @@
+sqlalchemy
+python-dotenv
+boto3
+celery
+redis
+ffmpeg-python
+openai-whisper
+psycopg2-binary
