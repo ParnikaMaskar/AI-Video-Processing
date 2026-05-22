@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // Determine the baseURL from environment variables.
 // Vite exposes env vars prefixed with VITE_ via import.meta.env
-const baseURL = import.meta.env.VITE_API_URL
+const baseURL = "/api"
 
 const api = axios.create({ baseURL })
 

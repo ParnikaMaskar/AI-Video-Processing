@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "http://video-platform-alb-v2-894219413.ap-south-1.elb.amazonaws.com/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
