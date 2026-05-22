@@ -40,6 +40,6 @@ jobs:
       - name: Redeploy ECS Worker
         run: |
           aws ecs update-service \
-          --cluster video-platform \
-          --service worker-service \
+          --cluster video-platform-cluster \
+          --service video-platform-worker-service-ya0jp3lj \
           --force-new-deployment
