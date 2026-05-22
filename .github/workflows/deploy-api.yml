@@ -40,6 +40,6 @@ jobs:
       - name: Redeploy ECS API
         run: |
           aws ecs update-service \
-          --cluster video-platform \
-          --service api-service \
+          --cluster video-platform-cluster \
+          --service backend-service-v2 \
           --force-new-deployment
