@@ -35,35 +35,41 @@ Upload videos directly to a private S3 bucket, process them asynchronously (thum
 
 ```mermaid
 graph TD
-    subgraph Host ["User Browser & Client (Host OS)"]
-        Browser["React SPA (Vite) - localhost:5173"]
-    end
 
-    subgraph DockerNet ["Docker network: video_network"]
-        FE["Frontend container (Vite)" ]
-        BE["Backend container (FastAPI) - :8000" ]
-        Worker["Celery worker (FFmpeg + Whisper)" ]
-        DB[("Postgres + pgvector" )]
-        Redis[("Redis broker" )]
-    end
+    Browser["React SPA (Vite)"]
 
-    S3["Private S3 bucket" ]
+    FE["Frontend"]
+    BE["FastAPI"]
+    Worker["Celery Worker"]
 
-    Browser -->|Open app| FE
+    FFmpeg["FFmpeg"]
+    Whisper["Whisper"]
 
-    Browser -->|Request presigned PUT URL| BE
-    BE -->|Presign PUT| S3
-    Browser -->|Upload video directly| S3
+    DB["Postgres + pgvector"]
+    Redis["Redis"]
+    S3["Private S3 Bucket"]
 
-    Browser -->|Confirm upload| BE
-    BE -->|Enqueue process_video| Redis
-    Redis -->|Run task| Worker
+    Browser --> FE
 
-    Worker -->|Download video| S3
-    Worker -->|thumbnail (FFmpeg)| Worker
-    Worker -->|Upload thumbnail| S3
-    Worker -->|Transcribe + chunk + embed| Worker
-    Worker -->|Save status + transcript + chunks| DB
+    Browser -->|Request Upload URL| BE
+    BE --> S3
+    Browser -->|Upload Video| S3
+
+    Browser -->|Confirm Upload| BE
+    BE --> Redis
+    Redis --> Worker
+
+    Worker -->|Download Video| S3
+    Worker --> FFmpeg
+    FFmpeg -->|Upload Thumbnail| S3
+
+    Worker --> Whisper
+    Whisper -->|Store Transcript| DB
+
+    Worker -->|Store Embeddings| DB
+
+    Browser -->|Search| BE
+    BE --> DB
 ```
 
 ### End-to-end flow (Upload → Processing → Search)
