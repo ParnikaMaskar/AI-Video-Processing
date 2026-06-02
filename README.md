@@ -60,7 +60,7 @@ graph TD
     Redis -->|Run task| Worker
 
     Worker -->|Download video| S3
-    Worker -->|Generate thumbnail (FFmpeg)| Worker
+    Worker -->|thumbnail (FFmpeg)| Worker
     Worker -->|Upload thumbnail| S3
     Worker -->|Transcribe + chunk + embed| Worker
     Worker -->|Save status + transcript + chunks| DB
